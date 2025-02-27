@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"unicode/utf8"
@@ -205,17 +206,17 @@ func action(w http.ResponseWriter, r *http.Request) {
 		}
 	case "copy":
 		if len(names) > 0 {
-			http.SetCookie(w, &http.Cookie{Name: "cpdir", Value: p})
+			http.SetCookie(w, &http.Cookie{Name: "cpdir", Value: url.QueryEscape(p)})
 			encodedNames := strings.Join(names, "!$!")
-			http.SetCookie(w, &http.Cookie{Name: "cpitems", Value: string(encodedNames)})
+			http.SetCookie(w, &http.Cookie{Name: "cpitems", Value: url.QueryEscape(encodedNames)})
 			http.SetCookie(w, &http.Cookie{Name: "delorigin", Value: "false"})
 		}
 		http.Redirect(w, r, p, http.StatusMovedPermanently)
 	case "cut":
 		if len(names) > 0 {
-			http.SetCookie(w, &http.Cookie{Name: "cpdir", Value: p})
+			http.SetCookie(w, &http.Cookie{Name: "cpdir", Value: url.QueryEscape(p)})
 			encodedNames := strings.Join(names, "!$!")
-			http.SetCookie(w, &http.Cookie{Name: "cpitems", Value: string(encodedNames)})
+			http.SetCookie(w, &http.Cookie{Name: "cpitems", Value: url.QueryEscape(encodedNames)})
 			http.SetCookie(w, &http.Cookie{Name: "delorigin", Value: "true"})
 		}
 		http.Redirect(w, r, p, http.StatusMovedPermanently)
@@ -226,8 +227,17 @@ func action(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, p, http.StatusMovedPermanently)
 			return
 		}
+		cpdirValue, err := url.QueryUnescape(cpdir.Value)
+		if err != nil {
+			http.Redirect(w, r, p, http.StatusMovedPermanently)
+		}
 		var encodedNames *http.Cookie
 		encodedNames, err = r.Cookie("cpitems")
+		if err != nil {
+			http.Redirect(w, r, p, http.StatusMovedPermanently)
+			return
+		}
+		decodedNamesValue, err := url.QueryUnescape(encodedNames.Value)
 		if err != nil {
 			http.Redirect(w, r, p, http.StatusMovedPermanently)
 			return
@@ -238,9 +248,9 @@ func action(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, p, http.StatusMovedPermanently)
 			return
 		}
-		decodedNames := strings.Split(encodedNames.Value, "!$!")
+		decodedNames := strings.Split(decodedNamesValue, "!$!")
 		for _, name := range decodedNames {
-			srcPath := path.Join(cpdir.Value, name)
+			srcPath := path.Join(cpdirValue, name)
 			destPath := path.Join(p, name)
 			_, err = os.Stat(destPath)
 			for !os.IsNotExist(err) {
