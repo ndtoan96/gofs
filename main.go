@@ -63,7 +63,7 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 	p := r.PathValue("path")
 	selectState := r.URL.Query().Get("select")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
@@ -108,7 +108,7 @@ func action(w http.ResponseWriter, r *http.Request) {
 	names := r.PostForm["select"]
 	p := r.FormValue("path")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -281,7 +281,7 @@ func delete(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	p := r.FormValue("path")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -302,7 +302,7 @@ func delete(w http.ResponseWriter, r *http.Request) {
 func newFolder(w http.ResponseWriter, r *http.Request) {
 	p := r.FormValue("path")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -317,7 +317,7 @@ func archive(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	p := r.FormValue("path")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -386,7 +386,7 @@ func rename(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	p := r.FormValue("path")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -415,7 +415,7 @@ func rename(w http.ResponseWriter, r *http.Request) {
 func upload(w http.ResponseWriter, r *http.Request) {
 	p := r.FormValue("path")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -455,7 +455,7 @@ func edit(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	p := r.FormValue("path")
 	p = path.Clean(p)
-	if strings.HasPrefix(p, "..") {
+	if strings.HasPrefix(p, "..") || path.IsAbs(p) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
