@@ -38,8 +38,8 @@ You can download pre-built binary in the
 - [x] Support https
 - [x] Drag and drop
 - [x] Serve index.html
+- [x] Sorting
 - [ ] Searching
-- [ ] Sorting
 
 ## Usage
 
