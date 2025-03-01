@@ -121,3 +121,7 @@ form.upload-form {
     min-height: 70vh;
     min-width: 100vw;
 }
+
+th a {
+    text-decoration: none;
+}

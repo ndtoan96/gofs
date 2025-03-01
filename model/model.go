@@ -43,6 +43,8 @@ type FilesPageModel struct {
 	Items       []Item
 	AllowWrite  bool
 	SelectState string
+	SortField   string
+	Desc        bool
 }
 
 type DeletePageModel struct {
