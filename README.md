@@ -9,9 +9,7 @@ e-reader devices).
 
 ## Demo
 
-
 https://github.com/user-attachments/assets/5a02fe4c-2ae4-485b-8860-d60071ebee8d
-
 
 ## Install
 
@@ -39,9 +37,9 @@ You can download pre-built binary in the
 - [x] Edit
 - [x] Support https
 - [x] Drag and drop
+- [x] Serve index.html
 - [ ] Searching
 - [ ] Sorting
-- [ ] Serve index.html
 
 ## Usage
 
