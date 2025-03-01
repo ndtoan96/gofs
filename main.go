@@ -13,6 +13,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"sort"
 	"unicode/utf8"
 
 	"strings"
@@ -70,6 +71,18 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 	if p == "" {
 		p = "."
 	}
+	sortField := r.URL.Query().Get("sort")
+	if sortField == "" || (sortField != "mtime" && sortField != "size") {
+		sortField = "name"
+	}
+	desc := r.URL.Query().Get("desc")
+	var descb bool
+	if desc != "true" {
+		descb = false
+	} else {
+		descb = true
+	}
+
 	info, err := os.Stat(p)
 	if os.IsNotExist(err) {
 		w.WriteHeader(http.StatusNotFound)
@@ -94,7 +107,36 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 				items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size())})
 			}
 		}
-		if err := tmpl["files"].Execute(w, model.FilesPageModel{Path: model.Path(p), Items: items, AllowWrite: allowWrite, SelectState: selectState}); err != nil {
+		sort.Slice(items, func(i, j int) bool {
+			var first int
+			var second int
+			if !descb {
+				first = i
+				second = j
+			} else {
+				first = j
+				second = i
+			}
+			switch sortField {
+			case "mtime":
+				return items[first].LastModified.Before(items[second].LastModified)
+			case "size":
+				if items[i].IsDir && !items[j].IsDir {
+					return true
+				}
+				if !items[i].IsDir && items[j].IsDir {
+					return false
+				}
+				if items[first].IsDir && items[second].IsDir {
+					return items[first].Size.(model.DirSize) < items[second].Size.(model.DirSize)
+				} else {
+					return items[first].Size.(model.FileSize) < items[second].Size.(model.FileSize)
+				}
+			default:
+				return strings.ToLower(items[first].Name) < strings.ToLower(items[second].Name)
+			}
+		})
+		if err := tmpl["files"].Execute(w, model.FilesPageModel{Path: model.Path(p), Items: items, AllowWrite: allowWrite, SelectState: selectState, SortField: sortField, Desc: descb}); err != nil {
 			log.Fatalln("[ERROR]", err)
 		}
 
