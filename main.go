@@ -480,12 +480,14 @@ func main() {
 	var host string
 	var tlsCert string
 	var tlsKey string
+	var index bool
 	pflag.BoolVarP(&allowWrite, "write", "w", false, "Allow write access")
 	pflag.StringVarP(&host, "host", "h", "[::]", "Host address to listen")
 	pflag.IntVarP(&port, "port", "p", 8080, "Port to listen")
 	pflag.StringVarP(&workingDir, "dir", "d", ".", "Directory to serve")
 	pflag.StringVar(&tlsCert, "tsl-cert", "", "Path to an SSL/TLS certificate to serve with HTTPS")
 	pflag.StringVar(&tlsKey, "tsl-key", "", "Path to an SSL/TLS certificate's private key")
+	pflag.BoolVarP(&index, "index", "i", false, "Render index.html")
 
 	if tlsCert == "" && tlsKey != "" {
 		log.Fatalln("Missing SSL/TLS certificate's private key")
@@ -507,28 +509,40 @@ func main() {
 	tmpl["rename"] = template.Must(template.New("rename").Parse(htmlLayout + htmlRename))
 	tmpl["edit"] = template.Must(template.New("edit").Parse(htmlLayout + htmlEdit))
 
-	http.HandleFunc("GET /{path...}", servePath)
-	http.HandleFunc("POST /action", action)
-	if allowWrite {
-		http.HandleFunc("POST /delete", delete)
-		http.HandleFunc("POST /new-folder", newFolder)
-		http.HandleFunc("POST /archive", archive)
-		http.HandleFunc("POST /rename", rename)
-		http.HandleFunc("POST /upload", upload)
-		http.HandleFunc("POST /edit", edit)
+	if !index {
+		http.HandleFunc("GET /{path...}", servePath)
+		http.HandleFunc("POST /action", action)
+		if allowWrite {
+			http.HandleFunc("POST /delete", delete)
+			http.HandleFunc("POST /new-folder", newFolder)
+			http.HandleFunc("POST /archive", archive)
+			http.HandleFunc("POST /rename", rename)
+			http.HandleFunc("POST /upload", upload)
+			http.HandleFunc("POST /edit", edit)
+		}
+		http.HandleFunc("GET /__gofs__/style.css", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/css")
+			io.WriteString(w, cssStyle)
+		})
+		http.HandleFunc("GET /__gofs__/favicon.svg", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "image/svg+xml")
+			w.Write(faviconImg)
+		})
+		http.HandleFunc("GET /__gofs__/script.js", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/javascript")
+			io.WriteString(w, scriptSource)
+		})
+	} else {
+		_, err := os.Stat("index.html")
+		if os.IsNotExist(err) {
+			fmt.Println("Error: Cannot find index.html in the current folder.")
+			return
+		} else {
+			fs := http.FileServer(http.Dir("."))
+			http.Handle("/", fs)
+		}
 	}
-	http.HandleFunc("GET /__gofs__/style.css", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/css")
-		io.WriteString(w, cssStyle)
-	})
-	http.HandleFunc("GET /__gofs__/favicon.svg", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "image/svg+xml")
-		w.Write(faviconImg)
-	})
-	http.HandleFunc("GET /__gofs__/script.js", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/javascript")
-		io.WriteString(w, scriptSource)
-	})
+
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		log.Fatal(err)
