@@ -45,12 +45,13 @@ You can download pre-built binary in the
 
 ```
 Usage of gofs:
+  -d, --dir string        Directory to serve (default ".")
+  -h, --host string       Host address to listen (default "[::]")
+  -i, --index             Render index.html
+  -p, --port int          Port to listen (default 8080)
       --tsl-cert string   Path to an SSL/TLS certificate to serve with HTTPS
       --tsl-key string    Path to an SSL/TLS certificate's private key
-  -d, --dir string          Directory to serve (default ".")
-  -h, --host string         Host address to listen (default "[::]")
-  -p, --port int            Port to listen (default 8080)
-  -w, --write               Allow write access
+  -w, --write             Allow write access
 ```
 
 ## Example
