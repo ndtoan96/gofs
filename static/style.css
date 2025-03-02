@@ -149,9 +149,14 @@ div#drop-zone {
 
 div.preview-pane {
     position: relative;
+}
+
+div.preview-content {
+    position: relative;
     margin-left: 10ch;
     padding: 10px;
-    width: 30vw;
+    max-width: 50vw;
+    min-width: 30vw;
     height: 70vh;
     border-width: 1px;
     border-radius: 3px;
@@ -162,13 +167,9 @@ div.preview-pane {
 
 .preview-close a {
     position: absolute;
-    top: 10px;
+    top: -30px;
     right: 10px;
     text-align: center;
     text-decoration: none;
     vertical-align: middle;
-}
-
-.preview-content {
-    padding-right: 5ch;
 }
