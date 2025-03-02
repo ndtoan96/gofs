@@ -17,7 +17,10 @@ import (
 
 	"strings"
 
+	"github.com/ndtoan96/gofs/io_helper"
 	"github.com/ndtoan96/gofs/model"
+	"github.com/ndtoan96/gofs/preview"
+	"github.com/ndtoan96/gofs/search"
 	cp "github.com/otiai10/copy"
 	"github.com/spf13/pflag"
 
@@ -84,8 +87,8 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 	} else {
 		descb = true
 	}
-	preview := r.URL.Query().Get("preview")
-	htmlPreview := getHtmlPreview(p, preview)
+	preview_param := r.URL.Query().Get("preview")
+	htmlPreview := preview.GetHtmlPreview(p, preview_param)
 
 	info, err := os.Stat(p)
 	if os.IsNotExist(err) {
@@ -112,7 +115,7 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "archive"})
 				} else if ext := path.Ext(e.Name()); ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" || ext == ".svg" {
 					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "image"})
-				} else if yes, _ := isTextFile(path.Join(p, e.Name())); yes {
+				} else if yes, _ := io_helper.IsTextFile(path.Join(p, e.Name())); yes {
 					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "text"})
 				} else {
 					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "binary"})
@@ -194,7 +197,7 @@ func action(w http.ResponseWriter, r *http.Request) {
 	case "edit":
 		editableFiles := make([]string, 0)
 		for _, name := range names {
-			yes, _ := isTextFile(path.Join(p, name))
+			yes, _ := io_helper.IsTextFile(path.Join(p, name))
 			if yes {
 				editableFiles = append(editableFiles, name)
 			}
@@ -321,7 +324,7 @@ func action(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var results []model.SearchResult
-		results, err = doSearch(p, text)
+		results, err = search.Search(p, text)
 		if err == nil {
 			err = tmpl["search"].Execute(w, model.SearchPageModel{Search: text, Results: results, Path: model.Path(p)})
 		}

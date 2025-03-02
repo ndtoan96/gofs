@@ -1,13 +1,10 @@
-package main
+package preview
 
 import (
 	"bufio"
 	"bytes"
 	"html/template"
-	"os"
 	"path"
-	"sort"
-	"unicode/utf8"
 
 	htmlFmt "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
@@ -15,18 +12,17 @@ import (
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
-	"github.com/lithammer/fuzzysearch/fuzzy"
-	"github.com/ndtoan96/gofs/model"
+	"github.com/ndtoan96/gofs/io_helper"
 )
 
 const PREVIEW_LIMIT = 1024 * 10
 
-func getHtmlPreview(dir string, name string) template.HTML {
+func GetHtmlPreview(dir string, name string) template.HTML {
 	if name == "" {
 		return template.HTML("")
 	}
 	filePath := path.Join(dir, name)
-	isText, err := isTextFile(filePath)
+	isText, err := io_helper.IsTextFile(filePath)
 	if err != nil {
 		return template.HTML("Cannot preview this file")
 	}
@@ -38,7 +34,7 @@ func getHtmlPreview(dir string, name string) template.HTML {
 			}
 			return template.HTML(md)
 		} else if ext := path.Ext(filePath); ext == ".svg" {
-			return template.HTML("<img src=\"" + filePath + "\">")
+			return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + filePath + "\">")
 		} else {
 			lexer := lexers.Match(name)
 			if lexer == nil {
@@ -56,8 +52,9 @@ func getHtmlPreview(dir string, name string) template.HTML {
 		}
 	} else {
 		if ext := path.Ext(filePath); ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" {
-			return template.HTML("<img src=\"" + filePath + "\">")
+			return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + filePath + "\">")
 		}
+		// TODO: preview PDF and archive
 	}
 	return template.HTML("Cannot preview this file")
 }
@@ -72,7 +69,7 @@ func renderCode(filePath string) (string, error) {
 		style = styles.Fallback
 	}
 	formatter := htmlFmt.New()
-	content, err := readPart(filePath, PREVIEW_LIMIT)
+	content, err := io_helper.ReadPart(filePath, PREVIEW_LIMIT)
 	if err != nil {
 		return "", err
 	}
@@ -90,7 +87,7 @@ func renderCode(filePath string) (string, error) {
 }
 
 func renderText(filePath string) (string, error) {
-	content, err := readPart(filePath, PREVIEW_LIMIT)
+	content, err := io_helper.ReadPart(filePath, PREVIEW_LIMIT)
 	if err != nil {
 		return "", err
 	}
@@ -98,7 +95,7 @@ func renderText(filePath string) (string, error) {
 }
 
 func renderMarkdown(filePath string) (string, error) {
-	content, err := readPart(filePath, PREVIEW_LIMIT)
+	content, err := io_helper.ReadPart(filePath, PREVIEW_LIMIT)
 	if err != nil {
 		return "", err
 	}
@@ -114,60 +111,4 @@ func renderMarkdown(filePath string) (string, error) {
 	md := string(markdown.Render(doc, renderer))
 	endPreview := ""
 	return md + endPreview, nil
-}
-
-func readPart(filePath string, n int) ([]byte, error) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	buffer := make([]byte, n)
-	bufReader := bufio.NewReader(f)
-	numBytes, err := bufReader.Read(buffer)
-	if err != nil {
-		return nil, err
-	}
-	return buffer[:numBytes], nil
-}
-
-func isTextFile(filePath string) (bool, error) {
-	content, err := readPart(filePath, 1024)
-	if err != nil {
-		return false, err
-	}
-	if utf8.Valid(content) {
-		return true, nil
-	} else {
-		return false, nil
-	}
-}
-
-func doSearch(dir string, text string) ([]model.SearchResult, error) {
-	results := make([]model.SearchResult, 0)
-	err := recursiveSearch(&results, dir, text)
-	if err != nil {
-		return nil, err
-	}
-	sort.Slice(results, func(i int, j int) bool {
-		return results[i].Score > results[j].Score
-	})
-	return results, nil
-}
-
-func recursiveSearch(results *[]model.SearchResult, dir string, text string) error {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-	for _, entry := range entries {
-		score := fuzzy.RankMatchFold(text, path.Join(dir, entry.Name()))
-		if score != -1 {
-			*results = append(*results, model.SearchResult{Path: path.Join(dir, entry.Name()), IsDir: entry.IsDir(), Score: score})
-		}
-		if entry.IsDir() {
-			recursiveSearch(results, path.Join(dir, entry.Name()), text)
-		}
-	}
-	return nil
 }
