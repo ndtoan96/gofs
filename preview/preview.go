@@ -4,12 +4,15 @@ import (
 	"archive/zip"
 	"bufio"
 	"bytes"
+	"encoding/base64"
 	"html/template"
+	"log"
 	"path"
 
 	htmlFmt "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/alecthomas/chroma/v2/lexers"
 	"github.com/alecthomas/chroma/v2/styles"
+	"github.com/gen2brain/go-fitz"
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
@@ -61,10 +64,30 @@ func GetHtmlPreview(dir string, name string) template.HTML {
 				return template.HTML("Cannot preview this file")
 			}
 			return template.HTML(htmlZip)
+		} else if ext == ".pdf" {
+			encodedImage, err := renderPdf(filePath)
+			if err != nil {
+				log.Println("ERROR:", err)
+				return template.HTML("Cannot preview this file")
+			}
+			return template.HTML("<img src=\"" + encodedImage + "\">")
 		}
-		// TODO: preview PDF and epub
 	}
 	return template.HTML("Cannot preview this file")
+}
+
+func renderPdf(filePath string) (string, error) {
+	doc, err := fitz.New(filePath)
+	if err != nil {
+		return "", err
+	}
+	data, err := doc.ImagePNG(0, 120)
+	if err != nil {
+		return "", err
+	}
+	encoded := base64.StdEncoding.EncodeToString(data)
+	return "data:image/png;base64," + encoded, nil
+
 }
 
 func renderZip(filePath string) (string, error) {

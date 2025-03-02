@@ -14,6 +14,9 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.4 // indirect
+	github.com/ebitengine/purego v0.8.0 // indirect
+	github.com/gen2brain/go-fitz v1.24.14 // indirect
+	github.com/jupiterrider/ffi v0.2.0 // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
