@@ -1,6 +1,7 @@
 package preview
 
 import (
+	"archive/zip"
 	"bufio"
 	"bytes"
 	"html/template"
@@ -33,7 +34,7 @@ func GetHtmlPreview(dir string, name string) template.HTML {
 				return template.HTML("Cannot preview this file")
 			}
 			return template.HTML(md)
-		} else if ext := path.Ext(filePath); ext == ".svg" {
+		} else if path.Ext(filePath) == ".svg" {
 			return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + filePath + "\">")
 		} else {
 			lexer := lexers.Match(name)
@@ -51,12 +52,33 @@ func GetHtmlPreview(dir string, name string) template.HTML {
 			return template.HTML(code)
 		}
 	} else {
-		if ext := path.Ext(filePath); ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" {
+		ext := path.Ext(filePath)
+		if ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" {
 			return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + filePath + "\">")
+		} else if ext == ".zip" {
+			htmlZip, err := renderZip(filePath)
+			if err != nil {
+				return template.HTML("Cannot preview this file")
+			}
+			return template.HTML(htmlZip)
 		}
-		// TODO: preview PDF and archive
+		// TODO: preview PDF and epub
 	}
 	return template.HTML("Cannot preview this file")
+}
+
+func renderZip(filePath string) (string, error) {
+	z, err := zip.OpenReader(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer z.Close()
+	files := "<ul>\n"
+	for _, f := range z.File {
+		files += "<li>" + f.Name + "</li>\n"
+	}
+	files += "</ul>"
+	return files, nil
 }
 
 func renderCode(filePath string) (string, error) {
