@@ -37,6 +37,8 @@ func getHtmlPreview(dir string, name string) template.HTML {
 				return template.HTML("Cannot preview this file")
 			}
 			return template.HTML(md)
+		} else if ext := path.Ext(filePath); ext == ".svg" {
+			return template.HTML("<img src=\"" + filePath + "\">")
 		} else {
 			lexer := lexers.Match(name)
 			if lexer == nil {
@@ -53,7 +55,9 @@ func getHtmlPreview(dir string, name string) template.HTML {
 			return template.HTML(code)
 		}
 	} else {
-		// TODO: render zip, pdf and epub
+		if ext := path.Ext(filePath); ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" {
+			return template.HTML("<img src=\"" + filePath + "\">")
+		}
 	}
 	return template.HTML("Cannot preview this file")
 }

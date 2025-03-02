@@ -108,7 +108,15 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 				d, _ := os.ReadDir(e.Name())
 				items = append(items, model.Item{IsDir: true, Name: e.Name(), LastModified: info.ModTime(), Size: model.DirSize(len(d))})
 			} else {
-				items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size())})
+				if ext := path.Ext(e.Name()); ext == ".zip" || ext == ".7z" || ext == ".gz" || ext == ".rar" || ext == ".tar" || ext == ".jar" || ext == ".bz" || ext == ".epub" {
+					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "archive"})
+				} else if ext := path.Ext(e.Name()); ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" || ext == ".svg" {
+					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "image"})
+				} else if yes, _ := isTextFile(path.Join(p, e.Name())); yes {
+					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "text"})
+				} else {
+					items = append(items, model.Item{IsDir: false, Name: e.Name(), LastModified: info.ModTime(), Size: model.FileSize(info.Size()), FileType: "binary"})
+				}
 			}
 		}
 		sort.Slice(items, func(i, j int) bool {

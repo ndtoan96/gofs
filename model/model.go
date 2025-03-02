@@ -38,6 +38,7 @@ type Item struct {
 	LastModified time.Time
 	Size         ISize
 	IsDir        bool
+	FileType     string
 }
 
 type FilesPageModel struct {
