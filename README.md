@@ -40,7 +40,7 @@ You can download pre-built binary in the
 - [x] Serve index.html
 - [x] Sorting
 - [x] Searching
-- [ ] Preview
+- [x] Preview
 
 ## Usage
 

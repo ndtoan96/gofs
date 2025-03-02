@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"html/template"
 	"path"
 	"slices"
 	"strings"
@@ -37,6 +38,7 @@ type Item struct {
 	LastModified time.Time
 	Size         ISize
 	IsDir        bool
+	FileType     string
 }
 
 type FilesPageModel struct {
@@ -46,6 +48,8 @@ type FilesPageModel struct {
 	SelectState string
 	SortField   string
 	Desc        bool
+	Preview     template.HTML
+	PreviewName string
 }
 
 type DeletePageModel struct {
