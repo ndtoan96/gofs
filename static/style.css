@@ -148,7 +148,7 @@ div#drop-zone {
 }
 
 div.preview-content {
-    margin-left: 10ch;
+    margin-left: 5ch;
     padding: 10px;
     max-width: 50vw;
     min-width: 30vw;
@@ -172,7 +172,7 @@ div.preview-content {
 
 .preview-header {
     display: flex;
-    margin-left: 10ch;
+    margin-left: 5ch;
 }
 
 .preview-title {
