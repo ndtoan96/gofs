@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -72,12 +73,50 @@ type EditPageModel struct {
 	Contents []string
 }
 
+type SearchPageModel struct {
+	Path    Path
+	Search  string
+	Results []SearchResult
+}
+
 type ParentItem struct {
 	Name string
 	Path Path
 }
 
 type Path string
+
+type SearchResult struct {
+	Path  string
+	IsDir bool
+	Score int
+}
+
+func (r SearchResult) Dir() string {
+	if r.IsDir {
+		return r.Path
+	} else {
+		return path.Dir(r.Path)
+	}
+}
+
+func (r SearchResult) RelativeDirFrom(p Path) string {
+	tmp := strings.TrimPrefix(r.Path, string(p))
+	tmp = strings.TrimPrefix(tmp, "/")
+	if r.IsDir {
+		return tmp
+	} else {
+		return path.Dir(tmp)
+	}
+}
+
+func (r SearchResult) FileName() string {
+	if r.IsDir {
+		return ""
+	} else {
+		return path.Base(r.Path)
+	}
+}
 
 func (p Path) Parents() []ParentItem {
 	items := make([]ParentItem, 0)

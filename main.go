@@ -18,6 +18,7 @@ import (
 
 	"strings"
 
+	"github.com/lithammer/fuzzysearch/fuzzy"
 	"github.com/ndtoan96/gofs/model"
 	cp "github.com/otiai10/copy"
 	"github.com/spf13/pflag"
@@ -50,6 +51,9 @@ var htmlRename string
 
 //go:embed templates/edit.html
 var htmlEdit string
+
+//go:embed templates/search.html
+var htmlSearch string
 
 //go:embed static/style.css
 var cssStyle string
@@ -310,6 +314,17 @@ func action(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		http.Redirect(w, r, p, http.StatusMovedPermanently)
+	case "search":
+		text := r.FormValue("search")
+		if text == "" {
+			http.Redirect(w, r, p, http.StatusMovedPermanently)
+			return
+		}
+		var results []model.SearchResult
+		results, err = doSearch(p, text)
+		if err == nil {
+			err = tmpl["search"].Execute(w, model.SearchPageModel{Search: text, Results: results, Path: model.Path(p)})
+		}
 	default:
 		w.WriteHeader(http.StatusBadRequest)
 	}
@@ -317,6 +332,35 @@ func action(w http.ResponseWriter, r *http.Request) {
 		log.Println("[ERROR]", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func doSearch(dir string, text string) ([]model.SearchResult, error) {
+	results := make([]model.SearchResult, 0)
+	err := recursiveSearch(&results, dir, text)
+	if err != nil {
+		return nil, err
+	}
+	sort.Slice(results, func(i int, j int) bool {
+		return results[i].Score > results[j].Score
+	})
+	return results, nil
+}
+
+func recursiveSearch(results *[]model.SearchResult, dir string, text string) error {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		score := fuzzy.RankMatchFold(text, path.Join(dir, entry.Name()))
+		if score != -1 {
+			*results = append(*results, model.SearchResult{Path: path.Join(dir, entry.Name()), IsDir: entry.IsDir(), Score: score})
+		}
+		if entry.IsDir() {
+			recursiveSearch(results, path.Join(dir, entry.Name()), text)
+		}
+	}
+	return nil
 }
 
 func delete(w http.ResponseWriter, r *http.Request) {
@@ -550,6 +594,7 @@ func main() {
 	tmpl["upload"] = template.Must(template.New("upload").Parse(htmlLayout + htmlUpload))
 	tmpl["rename"] = template.Must(template.New("rename").Parse(htmlLayout + htmlRename))
 	tmpl["edit"] = template.Must(template.New("edit").Parse(htmlLayout + htmlEdit))
+	tmpl["search"] = template.Must(template.New("search").Parse(htmlLayout + htmlSearch))
 
 	if !index {
 		http.HandleFunc("GET /{path...}", servePath)

@@ -39,7 +39,7 @@ You can download pre-built binary in the
 - [x] Drag and drop
 - [x] Serve index.html
 - [x] Sorting
-- [ ] Searching
+- [x] Searching
 - [ ] Preview
 
 ## Usage
