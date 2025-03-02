@@ -49,6 +49,7 @@ type FilesPageModel struct {
 	SortField   string
 	Desc        bool
 	Preview     template.HTML
+	PreviewName string
 }
 
 type DeletePageModel struct {

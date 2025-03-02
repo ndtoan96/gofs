@@ -147,12 +147,7 @@ div#drop-zone {
     width: fit-content;
 }
 
-div.preview-pane {
-    position: relative;
-}
-
 div.preview-content {
-    position: relative;
     margin-left: 10ch;
     padding: 10px;
     max-width: 50vw;
@@ -165,11 +160,21 @@ div.preview-content {
     overflow: scroll;
 }
 
+.preview-close {
+    text-align: right;
+    padding-right: 0.5ch;
+    width: 100%;
+}
+
 .preview-close a {
-    position: absolute;
-    top: -30px;
-    right: 10px;
-    text-align: center;
     text-decoration: none;
-    vertical-align: middle;
+}
+
+.preview-header {
+    display: flex;
+    margin-left: 10ch;
+}
+
+.preview-title {
+    font-weight: bold;
 }

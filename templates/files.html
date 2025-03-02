@@ -311,8 +311,11 @@ Index of /{{if ne .Path "."}}{{.Path}}{{end}} - gofs
         </div>
         {{if ne .Preview ""}}
         <div class="preview-pane">
-            <div class="preview-close">
-                <a href="?select={{$.SelectState}}&sort={{$.SortField}}&desc={{$.Desc}}">Close</a>
+            <div class="preview-header">
+                <div class="preview-title">{{.PreviewName}}</div>
+                <div class="preview-close">
+                    <a href="?select={{$.SelectState}}&sort={{$.SortField}}&desc={{$.Desc}}">Close</a>
+                </div>
             </div>
             <div class="preview-content">{{.Preview}}</div>
         </div>

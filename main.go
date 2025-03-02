@@ -87,8 +87,8 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 	} else {
 		descb = true
 	}
-	preview_param := r.URL.Query().Get("preview")
-	htmlPreview := preview.GetHtmlPreview(p, preview_param)
+	previewName := r.URL.Query().Get("preview")
+	htmlPreview := preview.GetHtmlPreview(p, previewName)
 
 	info, err := os.Stat(p)
 	if os.IsNotExist(err) {
@@ -151,7 +151,7 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 				return strings.ToLower(items[first].Name) < strings.ToLower(items[second].Name)
 			}
 		})
-		if err := tmpl["files"].Execute(w, model.FilesPageModel{Path: model.Path(p), Items: items, AllowWrite: allowWrite, SelectState: selectState, SortField: sortField, Desc: descb, Preview: htmlPreview}); err != nil {
+		if err := tmpl["files"].Execute(w, model.FilesPageModel{Path: model.Path(p), Items: items, AllowWrite: allowWrite, SelectState: selectState, SortField: sortField, Desc: descb, Preview: htmlPreview, PreviewName: previewName}); err != nil {
 			log.Fatalln("[ERROR]", err)
 		}
 
