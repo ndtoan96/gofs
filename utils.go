@@ -53,7 +53,7 @@ func getHtmlPreview(dir string, name string) template.HTML {
 			return template.HTML(code)
 		}
 	} else {
-
+		// TODO: render zip, pdf and epub
 	}
 	return template.HTML("Cannot preview this file")
 }
