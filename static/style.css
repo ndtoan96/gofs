@@ -117,11 +117,6 @@ form.upload-form {
     min-width: 8ch;
 }
 
-#drop-area {
-    min-height: 70vh;
-    min-width: 100vw;
-}
-
 th a {
     text-decoration: none;
 }
@@ -133,4 +128,47 @@ th a {
 
 .search-result  th {
     min-width: 20em;
+}
+
+.td-preview {
+    padding-left: 1ch;
+}
+
+.td-preview svg {
+    max-width: 1em;
+    max-height: 1em;
+}
+
+div.flex-container {
+    display: flex;
+}
+
+div#drop-zone {
+    width: fit-content;
+}
+
+div.preview-pane {
+    position: relative;
+    margin-left: 10ch;
+    padding: 10px;
+    width: 30vw;
+    height: 70vh;
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: #5c5c5c;
+    border-style: solid;
+    overflow: scroll;
+}
+
+.preview-close a {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+}
+
+.preview-content {
+    padding-right: 5ch;
 }

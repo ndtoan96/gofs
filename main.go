@@ -2,23 +2,21 @@ package main
 
 import (
 	"archive/zip"
-	"bufio"
 	"bytes"
 	"fmt"
 	"html/template"
 	"io"
 	"log"
+
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"sort"
-	"unicode/utf8"
 
 	"strings"
 
-	"github.com/lithammer/fuzzysearch/fuzzy"
 	"github.com/ndtoan96/gofs/model"
 	cp "github.com/otiai10/copy"
 	"github.com/spf13/pflag"
@@ -86,6 +84,8 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 	} else {
 		descb = true
 	}
+	preview := r.URL.Query().Get("preview")
+	htmlPreview := getHtmlPreview(p, preview)
 
 	info, err := os.Stat(p)
 	if os.IsNotExist(err) {
@@ -140,7 +140,7 @@ func servePath(w http.ResponseWriter, r *http.Request) {
 				return strings.ToLower(items[first].Name) < strings.ToLower(items[second].Name)
 			}
 		})
-		if err := tmpl["files"].Execute(w, model.FilesPageModel{Path: model.Path(p), Items: items, AllowWrite: allowWrite, SelectState: selectState, SortField: sortField, Desc: descb}); err != nil {
+		if err := tmpl["files"].Execute(w, model.FilesPageModel{Path: model.Path(p), Items: items, AllowWrite: allowWrite, SelectState: selectState, SortField: sortField, Desc: descb, Preview: htmlPreview}); err != nil {
 			log.Fatalln("[ERROR]", err)
 		}
 
@@ -186,17 +186,9 @@ func action(w http.ResponseWriter, r *http.Request) {
 	case "edit":
 		editableFiles := make([]string, 0)
 		for _, name := range names {
-			f, tmp_err := os.Open(path.Join(p, name))
-			if tmp_err == nil {
-				buffer := make([]byte, 1024)
-				bufReader := bufio.NewReader(f)
-				n, tmp_err := bufReader.Read(buffer)
-				if tmp_err == nil && utf8.Valid(buffer[:n]) {
-					editableFiles = append(editableFiles, name)
-				} else {
-					fmt.Printf("%v", tmp_err)
-				}
-				f.Close()
+			yes, _ := isTextFile(path.Join(p, name))
+			if yes {
+				editableFiles = append(editableFiles, name)
 			}
 		}
 		if len(editableFiles) > 0 {
@@ -332,35 +324,6 @@ func action(w http.ResponseWriter, r *http.Request) {
 		log.Println("[ERROR]", err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-}
-
-func doSearch(dir string, text string) ([]model.SearchResult, error) {
-	results := make([]model.SearchResult, 0)
-	err := recursiveSearch(&results, dir, text)
-	if err != nil {
-		return nil, err
-	}
-	sort.Slice(results, func(i int, j int) bool {
-		return results[i].Score > results[j].Score
-	})
-	return results, nil
-}
-
-func recursiveSearch(results *[]model.SearchResult, dir string, text string) error {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-	for _, entry := range entries {
-		score := fuzzy.RankMatchFold(text, path.Join(dir, entry.Name()))
-		if score != -1 {
-			*results = append(*results, model.SearchResult{Path: path.Join(dir, entry.Name()), IsDir: entry.IsDir(), Score: score})
-		}
-		if entry.IsDir() {
-			recursiveSearch(results, path.Join(dir, entry.Name()), text)
-		}
-	}
-	return nil
 }
 
 func delete(w http.ResponseWriter, r *http.Request) {

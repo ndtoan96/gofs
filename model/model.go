@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"html/template"
 	"path"
 	"slices"
 	"strings"
@@ -46,6 +47,7 @@ type FilesPageModel struct {
 	SelectState string
 	SortField   string
 	Desc        bool
+	Preview     template.HTML
 }
 
 type DeletePageModel struct {
