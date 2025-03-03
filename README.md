@@ -9,7 +9,7 @@ e-reader devices).
 
 ## Demo
 
-https://github.com/user-attachments/assets/5a02fe4c-2ae4-485b-8860-d60071ebee8d
+https://github.com/user-attachments/assets/901357cb-d227-4369-9d57-e5eec63df241
 
 ## Install
 
