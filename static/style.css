@@ -126,8 +126,8 @@ th a {
     height: 1em;
 }
 
-.search-result  th {
-    min-width: 20em;
+.search-results {
+    margin-top: 2em;
 }
 
 .td-preview {

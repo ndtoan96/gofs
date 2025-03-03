@@ -93,7 +93,6 @@ type Path string
 type SearchResult struct {
 	Path  string
 	IsDir bool
-	Score int
 }
 
 func (r SearchResult) Dir() string {
