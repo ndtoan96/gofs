@@ -30,50 +30,52 @@ func GetHtmlPreview(dir string, name string) template.HTML {
 	if err != nil {
 		return template.HTML("Cannot preview this file")
 	}
-	if isText {
-		if path.Ext(name) == ".md" {
-			md, err := renderMarkdown(filePath)
-			if err != nil {
-				return template.HTML("Cannot preview this file")
-			}
-			return template.HTML(md)
-		} else if path.Ext(filePath) == ".svg" {
-			return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + filePath + "\">")
-		} else {
-			lexer := lexers.Match(name)
-			if lexer == nil {
-				txt, err := renderText(filePath)
-				if err != nil {
-					return template.HTML("Cannot preview this file")
-				}
-				return template.HTML(txt)
-			}
-			code, err := renderCode(filePath)
-			if err != nil {
-				return template.HTML("Cannot preview this file")
-			}
-			return template.HTML(code)
+	ext := path.Ext(filePath)
+	if ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" || ext == "svg" {
+		return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + filePath + "\">")
+	} else if ext == ".zip" {
+		htmlZip, err := renderZip(filePath)
+		if err != nil {
+			return template.HTML("Cannot preview this file")
 		}
+		return template.HTML(htmlZip)
+	} else if ext == ".pdf" {
+		encodedImage, err := renderPdf(filePath)
+		if err != nil {
+			log.Println("ERROR:", err)
+			return template.HTML("Cannot preview this file")
+		}
+		return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + encodedImage + "\">")
+	} else if ext == ".md" {
+		md, err := renderMarkdown(filePath)
+		if err != nil {
+			return template.HTML("Cannot preview this file")
+		}
+		return template.HTML(md)
+	} else if isText {
+		lexer := lexers.Match(name)
+		if lexer == nil {
+			txt, err := renderText(filePath)
+			if err != nil {
+				return template.HTML("Cannot preview this file")
+			}
+			return template.HTML(txt)
+		}
+		code, err := renderCode(filePath)
+		if err != nil {
+			return template.HTML("Cannot preview this file")
+		}
+		if code == "" {
+			txt, err := renderText(filePath)
+			if err != nil {
+				return template.HTML("Cannot preview this file")
+			}
+			return template.HTML(txt)
+		}
+		return template.HTML(code)
 	} else {
-		ext := path.Ext(filePath)
-		if ext == ".jpg" || ext == ".png" || ext == ".gif" || ext == ".webp" || ext == ".jpeg" {
-			return template.HTML("<img width=\"100%\" height=\"100%\" src=\"" + filePath + "\">")
-		} else if ext == ".zip" {
-			htmlZip, err := renderZip(filePath)
-			if err != nil {
-				return template.HTML("Cannot preview this file")
-			}
-			return template.HTML(htmlZip)
-		} else if ext == ".pdf" {
-			encodedImage, err := renderPdf(filePath)
-			if err != nil {
-				log.Println("ERROR:", err)
-				return template.HTML("Cannot preview this file")
-			}
-			return template.HTML("<img src=\"" + encodedImage + "\">")
-		}
+		return template.HTML("Cannot preview this file")
 	}
-	return template.HTML("Cannot preview this file")
 }
 
 func renderPdf(filePath string) (string, error) {
