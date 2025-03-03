@@ -9,7 +9,7 @@ jobs:
   build-windows:
     strategy:
       matrix:
-        arch: [amd64, arm64]
+        arch: [amd64]
     runs-on: windows-latest
 
     steps:
