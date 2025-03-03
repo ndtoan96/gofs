@@ -27,11 +27,11 @@ You can download pre-built binary in the
 ## Features
 
 - [x] Serve static files
-- [x] New folder
+- [x] Create folder
 - [x] Delete files/folders
 - [x] Archive
 - [x] Rename
-- [x] Upload files
+- [x] Upload
 - [x] Download
 - [x] Copy/Cut/Paste
 - [x] Edit
@@ -39,8 +39,8 @@ You can download pre-built binary in the
 - [x] Drag and drop
 - [x] Serve index.html
 - [x] Sorting
-- [x] Searching
-- [x] Preview
+- [x] Searching (plain text search or glob pattern search)
+- [x] Preview (markdown, text, code, image, pdf, zip)
 
 ## Usage
 
