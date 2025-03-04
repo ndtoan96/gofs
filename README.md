@@ -5,8 +5,6 @@ A simple static file server inspired by [dufs](https://github.com/sigoden/dufs).
 work even on browsers with limited capabilities (for example, browser on some
 e-reader devices).
 
-![image](https://github.com/user-attachments/assets/290ba8b9-de77-43e3-858e-e4cb03ed189a)
-
 ## Demo
 
 https://github.com/user-attachments/assets/901357cb-d227-4369-9d57-e5eec63df241
