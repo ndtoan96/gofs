@@ -1,6 +1,6 @@
 # Gofs
 
-A simple static file server inspired by [dufs](https://github.com/sigoden/dufs).
+A featureful file server inspired by [dufs](https://github.com/sigoden/dufs).
 `gofs` uses very little JavaScript (only for drag and drop), this allows it to
 work even on browsers with limited capabilities (for example, browser on some
 e-reader devices).
